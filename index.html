@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roast & Rest — Café Management</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Roast &amp; Rest</div>
+    <div class="tagline">Café Management Suite</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a class="nav-item" data-page="dashboard" onclick="navigate('dashboard')">
+      <span class="icon">⬛</span> Dashboard
+    </a>
+    <a class="nav-item" data-page="orders" onclick="navigate('orders')">
+      <span class="icon">📋</span> Orders
+    </a>
+    <a class="nav-item" data-page="tables" onclick="navigate('tables')">
+      <span class="icon">🪑</span> Tables
+    </a>
+
+    <div class="nav-section-label">Management</div>
+    <a class="nav-item" data-page="menu" onclick="navigate('menu')">
+      <span class="icon">☕</span> Menu
+    </a>
+    <a class="nav-item" data-page="inventory" onclick="navigate('inventory')">
+      <span class="icon">📦</span> Inventory
+    </a>
+    <a class="nav-item" data-page="staff" onclick="navigate('staff')">
+      <span class="icon">👥</span> Staff
+    </a>
+
+    <div class="nav-section-label">Analytics</div>
+    <a class="nav-item" data-page="reports" onclick="navigate('reports')">
+      <span class="icon">📊</span> Reports
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="staff-badge">
+      <div class="staff-avatar">AR</div>
+      <div class="staff-info">
+        <div class="name">Arjun Reddy</div>
+        <div class="role">Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ MAIN AREA ═══════════════ -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="page-title">Dashboard</div>
+    <div class="topbar-actions">
+      <div class="date-display" id="live-clock"></div>
+      <div class="notif-bell">🔔<div class="notif-dot"></div></div>
+      <button class="btn btn-primary" onclick="openNewOrder()">+ New Order</button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Today's Revenue</div>
+          <div class="stat-value" id="stat-revenue">—</div>
+          <div class="stat-sub">↑ 12% vs yesterday</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📋</div>
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" id="stat-orders">—</div>
+          <div class="stat-sub">Since opening</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🪑</div>
+          <div class="stat-label">Tables Occupied</div>
+          <div class="stat-value" id="stat-tables">—</div>
+          <div class="stat-sub">Click tables to manage</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Orders Served</div>
+          <div class="stat-value" id="stat-served">—</div>
+          <div class="stat-sub">Completed today</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="section-title">Recent Activity</div>
+              <div class="section-sub">Live order feed</div>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div id="activity-feed"></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="section-title">Top Selling Items</div>
+          </div>
+          <div class="panel-body">
+            <div id="top-items"></div>
+
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(44,24,16,0.07)">
+              <div class="section-title" style="font-size:15px;margin-bottom:14px">Staff On Duty</div>
+              <div id="dash-staff"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ORDERS ═══ -->
+    <div class="page" id="page-orders">
+      <div class="section-header" style="margin-bottom:20px">
+        <div id="orders-tabs" class="tabs">
+          <button class="tab active" data-filter="all" onclick="setOrderFilter('all')">All</button>
+          <button class="tab" data-filter="pending" onclick="setOrderFilter('pending')">Pending</button>
+          <button class="tab" data-filter="preparing" onclick="setOrderFilter('preparing')">Preparing</button>
+          <button class="tab" data-filter="served" onclick="setOrderFilter('served')">Served</button>
+        </div>
+        <button class="btn btn-primary" onclick="openNewOrder()">+ New Order</button>
+      </div>
+      <div class="orders-list" id="orders-list"></div>
+    </div>
+
+    <!-- ═══ MENU ═══ -->
+    <div class="page" id="page-menu">
+      <div class="section-header" style="margin-bottom:24px">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Search menu items..." oninput="searchMenu(this.value)" />
+        </div>
+        <div style="display:flex;gap:10px">
+          <div class="tabs">
+            <button class="tab active" onclick="renderMenu('all');this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">All</button>
+            <button class="tab" onclick="renderMenu('Coffee');this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">Coffee</button>
+            <button class="tab" onclick="renderMenu('Food');this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">Food</button>
+            <button class="tab" onclick="renderMenu('Pastry');this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">Pastry</button>
+            <button class="tab" onclick="renderMenu('Dessert');this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));this.classList.add('active')">Dessert</button>
+          </div>
+          <button class="btn btn-primary" onclick="openAddMenuItem()">+ Add Item</button>
+        </div>
+      </div>
+      <div class="menu-grid" id="menu-grid"></div>
+    </div>
+
+    <!-- ═══ TABLES ═══ -->
+    <div class="page" id="page-tables">
+      <div style="display:flex;gap:16px;margin-bottom:28px">
+        <div class="panel" style="flex:1;padding:20px;text-align:center">
+          <div class="stat-label">Occupied</div>
+          <div class="stat-value" style="font-size:28px;color:#C05B2C" id="table-occ">—</div>
+        </div>
+        <div class="panel" style="flex:1;padding:20px;text-align:center">
+          <div class="stat-label">Free</div>
+          <div class="stat-value" style="font-size:28px;color:#7A8C6E" id="table-free">—</div>
+        </div>
+        <div class="panel" style="flex:1;padding:20px;text-align:center">
+          <div class="stat-label">Reserved</div>
+          <div class="stat-value" style="font-size:28px;color:#3B82F6" id="table-res">—</div>
+        </div>
+        <div class="panel" style="flex:2;padding:20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:12px;height:12px;border-radius:50%;background:#7A8C6E"></div><span style="font-size:13px">Free</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:12px;height:12px;border-radius:50%;background:#C05B2C"></div><span style="font-size:13px">Occupied</span></div>
+          <div style="display:flex;align-items:center;gap:8px"><div style="width:12px;height:12px;border-radius:50%;background:#3B82F6"></div><span style="font-size:13px">Reserved</span></div>
+          <span style="font-size:12px;color:#A07850;font-style:italic">Click any table to cycle its status</span>
+        </div>
+      </div>
+      <div id="tables-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:16px"></div>
+    </div>
+
+    <!-- ═══ INVENTORY ═══ -->
+    <div class="page" id="page-inventory">
+      <div class="section-header" style="margin-bottom:20px">
+        <div>
+          <div class="section-title">Stock Levels</div>
+          <div class="section-sub">Items marked Low need restocking</div>
+        </div>
+        <button class="btn btn-primary" onclick="alert('Export feature coming soon!')">⬇ Export</button>
+      </div>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th>In Stock</th>
+              <th>Min Level</th>
+              <th>Level</th>
+              <th>Unit Cost</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ STAFF ═══ -->
+    <div class="page" id="page-staff">
+      <div class="section-header" style="margin-bottom:20px">
+        <div>
+          <div class="section-title">Team Members</div>
+          <div class="section-sub">Click Toggle to change duty status</div>
+        </div>
+        <button class="btn btn-primary" onclick="openAddStaff()">+ Add Staff</button>
+      </div>
+      <div class="panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Role</th>
+              <th>Shift</th>
+              <th>Status</th>
+              <th>Since</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="staff-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ REPORTS ═══ -->
+    <div class="page" id="page-reports">
+      <div class="stats-grid" style="margin-bottom:32px">
+        <div class="stat-card">
+          <div class="stat-label">Weekly Revenue</div>
+          <div class="stat-value" id="report-revenue">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Orders</div>
+          <div class="stat-value" id="report-orders">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg. Order Value</div>
+          <div class="stat-value" id="report-avg">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Staff On Duty</div>
+          <div class="stat-value" id="report-staff">—</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="section-title">Revenue — This Week</div>
+          <button class="btn btn-outline btn-sm" onclick="alert('Download PDF coming soon!')">⬇ Export</button>
+        </div>
+        <div class="panel-body">
+          <div id="bar-chart" style="display:flex;gap:12px;align-items:flex-end;padding:10px 0"></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px">
+        <div class="panel">
+          <div class="panel-header"><div class="section-title">Order Status Breakdown</div></div>
+          <div class="panel-body" id="status-breakdown">
+            <!-- rendered inline -->
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="section-title">Top Revenue Items</div></div>
+          <div class="panel-body">
+            <table>
+              <thead><tr><th>Item</th><th>Orders</th><th>Revenue</th></tr></thead>
+              <tbody>
+                <tr><td>Cappuccino</td><td>38</td><td>₹6,840</td></tr>
+                <tr><td>Flat White</td><td>29</td><td>₹5,800</td></tr>
+                <tr><td>Avocado Toast</td><td>21</td><td>₹5,880</td></tr>
+                <tr><td>Latte</td><td>34</td><td>₹6,460</td></tr>
+                <tr><td>Cheesecake</td><td>18</td><td>₹4,500</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-content -->
+</main>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- New Order Modal -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Order</div>
+      <button class="modal-close" onclick="closeModal('order-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Table Number</label>
+          <select id="field-order-table">
+            <option value="">Select table</option>
+            <script>for(let i=1;i<=12;i++)document.write(`<option value="${i}">Table ${i}</option>`)</script>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Total Amount (₹)</label>
+          <input type="number" id="field-order-total" placeholder="e.g. 580" min="0" />
+        </div>
+        <div class="form-group full">
+          <label>Items Ordered</label>
+          <textarea id="field-order-items" placeholder="e.g. Cappuccino × 2, Croissant × 1"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('order-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- Menu Item Modal -->
+<div class="modal-overlay" id="menu-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="menu-modal-title">Add Menu Item</div>
+      <button class="modal-close" onclick="closeModal('menu-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Item Name</label>
+          <input type="text" id="field-item-name" placeholder="e.g. Matcha Latte" />
+        </div>
+        <div class="form-group">
+          <label>Price (₹)</label>
+          <input type="number" id="field-item-price" placeholder="e.g. 220" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="field-item-cat">
+            <option>Coffee</option>
+            <option>Tea</option>
+            <option>Food</option>
+            <option>Pastry</option>
+            <option>Dessert</option>
+            <option>Beverage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Emoji Icon</label>
+          <input type="text" id="field-item-emoji" placeholder="e.g. 🍵" maxlength="2" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('menu-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMenuItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Staff Modal -->
+<div class="modal-overlay" id="staff-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Staff Member</div>
+      <button class="modal-close" onclick="closeModal('staff-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Full Name</label>
+          <input type="text" id="field-staff-name" placeholder="e.g. Meera Joshi" />
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select id="field-staff-role">
+            <option>Barista</option>
+            <option>Cashier</option>
+            <option>Waitstaff</option>
+            <option>Manager</option>
+            <option>Chef</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Shift</label>
+          <select id="field-staff-shift">
+            <option>Morning</option>
+            <option>Evening</option>
+            <option>Night</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Phone Number</label>
+          <input type="tel" id="field-staff-phone" placeholder="+91 98765 43210" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('staff-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStaff()">Add Member</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // Render dash staff inline
+  window.addEventListener('load', () => {
+    const el = document.getElementById('dash-staff');
+    if (el) {
+      el.innerHTML = store.staff.filter(s => s.status === 'on-duty').map(s => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(44,24,16,0.05)">
+          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#D4A054,#C05B2C);display:flex;align-items:center;justify-content:center;color:white;font-family:'Playfair Display',serif;font-weight:700;font-size:12px;flex-shrink:0">
+            ${s.name.split(' ').map(n => n[0]).join('')}
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:#2C1810">${s.name}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;color:#A07850">${s.role} · ${s.shift}</div>
+          </div>
+          <span class="badge badge-green">On Duty</span>
+        </div>
+      `).join('');
+    }
+    // Report status breakdown
+    const bd = document.getElementById('status-breakdown');
+    if (bd) {
+      const statuses = ['pending','preparing','served'];
+      const counts = statuses.map(s => store.orders.filter(o => o.status === s).length);
+      bd.innerHTML = statuses.map((s, i) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(44,24,16,0.05)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${{pending:'#C05B2C',preparing:'#D4A054',served:'#7A8C6E'}[s]}"></div>
+            <span style="font-size:13px;text-transform:capitalize">${s}</span>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:13px;color:#5C3D2E">${counts[i]} orders</div>
+        </div>
+      `).join('');
+    }
+  });
+</script>
+
+</body>
+</html>
